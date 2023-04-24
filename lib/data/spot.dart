@@ -1,2 +1,2 @@
 List Spots = ["theClimb", "thePlastic"];
-List SpotsView = ["The Climb", "The Plastic"];
+Map GymNameMapping = {"The Climb": "theClimb", "The Plastic": "thePlastic"};

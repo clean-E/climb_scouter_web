@@ -1,74 +1,121 @@
-import 'dart:html';
+import 'package:climb_scouter_web/models/record_Input.dart';
+import 'package:climb_scouter_web/providers/gymGrade_provider.dart';
+import 'package:climb_scouter_web/providers/record_provider.dart';
+import 'package:climb_scouter_web/providers/user_provider.dart';
+import 'package:climb_scouter_web/screens/home.dart';
+import 'package:climb_scouter_web/widgets/dropdown_menu.dart';
 import 'package:climb_scouter_web/data/grade.dart';
 import 'package:climb_scouter_web/data/spot.dart';
-import 'package:climb_scouter_web/models/solved.dart';
-import 'package:climb_scouter_web/providers/query/getGymGrade.dart';
-import 'package:climb_scouter_web/widgets/dropdown_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Record extends StatefulWidget {
-  const Record({Key? key}) : super(key: key);
-
+  Record({Key? key, required this.userNameList}) : super(key: key);
+  List userNameList;
   @override
   State<Record> createState() => _RecordState();
 }
 
 class _RecordState extends State<Record> {
-  List<Solved> solved = [];
-  late Map grade = {};
+  late String grade;
+  late List gradeSelected = [];
+  late String name;
   late List gradeList = [];
+  late List gradeKey = [];
+  late List userList = widget.userNameList;
   late String gym;
   late int count;
+  late List<Problems> solved = [];
+  late Map gradeSetted = {};
 
-  Future<List> getGrade(String gym) async {
+  Future getGrade(String gym) async {
     final gradeSetted =
         await Provider.of<GymGradeProvider>(context, listen: false)
             .getGymGrade(gym);
+    gradeSetted.remove("__typename");
 
     gradeList = gradeSetted.values.toList();
-    if (gradeList[0] == "GymGrade") {
-      gradeList.removeAt(0);
-    }
-    print(gradeList);
+    gradeKey = gradeSetted.keys.toList();
+
     setState(() {});
     ChangeNotifier();
-    return gradeList;
+    return gradeSetted;
+  }
+
+  Future createDaysRecord(name, gym, solved) async {
+    final createRecordByDay =
+        await Provider.of<RecordProvider>(context, listen: false)
+            .createRecord(name, gym, solved);
+
+    setState(() {});
+    ChangeNotifier();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("하루 운동 기록")),
+        appBar: AppBar(title: Text("The Day WorkOut Record")),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(10, 50, 10, 50),
           child: Column(
             children: [
               Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: CustDropDown(
-                      borderWidth: 0.8,
-                      hintText: "암장 선택",
-                      items: [
-                        for (var s in Spots)
-                          CustDropdownMenuItem(
-                              value: s,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                child: Text("${s}"),
-                              ))
-                      ],
-                      onChanged: (selectedGym) async {
-                        getGrade(selectedGym);
-                      })),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CustDropDown(
+                            maxListHeight: 500,
+                            borderWidth: 1,
+                            hintText: "Choose Name",
+                            items: [
+                              for (var u in userList)
+                                CustDropdownMenuItem(
+                                    value: u,
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 0, 0),
+                                      child: Text(
+                                        "${u}",
+                                      ),
+                                    ))
+                            ],
+                            onChanged: (selectedName) async {
+                              name = selectedName;
+                            }),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CustDropDown(
+                            borderWidth: 0.8,
+                            hintText: "Choose Gym",
+                            items: [
+                              for (var g in GymNameMapping.keys)
+                                CustDropdownMenuItem(
+                                    value: g,
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 0, 0),
+                                      child: Text("${g}"),
+                                    ))
+                            ],
+                            onChanged: (selectedGym) async {
+                              getGrade(GymNameMapping[selectedGym]);
+                              gym = GymNameMapping[selectedGym];
+                            }),
+                      ),
+                    ],
+                  )),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CustDropDown(
                         maxListHeight: 500,
-                        hintText: "난이도 선택",
+                        hintText: "Choose Grade",
                         items: [
                           for (var l in gradeList)
                             CustDropdownMenuItem(
@@ -76,24 +123,20 @@ class _RecordState extends State<Record> {
                                 child: Padding(
                                     padding:
                                         const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                    child: ColorLabel[l]
-                                    // Row(
-                                    //   children: [
-                                    //     ColorLabel[l],
-                                    //   ],
-                                    // ),
-                                    ))
+                                    child: ColorLabel[l]))
                         ],
-                        onChanged: (value) {
-                          print(value.label);
-                          grade = value.label;
+                        onChanged: (selectedGrade) {
+                          int findGrade = gradeList.indexOf(selectedGrade);
+                          grade = gradeKey[findGrade];
+                          gradeSelected.add(selectedGrade);
+                          setState(() {});
                         }),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CustDropDown(
                         maxListHeight: 500,
-                        hintText: "갯수 선택",
+                        hintText: "Choose number",
                         items: [
                           for (int i = 1; i <= 30; i++)
                             CustDropdownMenuItem(
@@ -104,39 +147,141 @@ class _RecordState extends State<Record> {
                                   child: Text("${i}"),
                                 ))
                         ],
-                        onChanged: (value) {
-                          print(value);
-                          count = value;
+                        onChanged: (countSelected) {
+                          count = countSelected;
                         }),
                   ),
-                  TextButton.icon(
-                    onPressed: () {
-                      // solved.add(value);
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text("추가"),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Problems problem = Problems(grade: grade, count: count);
+                        solved.add(problem);
+                        print(solved);
+                        setState(() {});
+                      },
+                      icon: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      style: TextButton.styleFrom(
+                          minimumSize: Size(100, 50),
+                          backgroundColor: Colors.teal[200],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20))),
+                      label: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Add",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
                   )
                 ],
               ),
+              solved.isEmpty
+                  ? Container()
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 30, 20, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(30, 0, 20, 0),
+                              child: Text(
+                                "Color",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
+                              )),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 0, 20, 0),
+                            child: Text("Grade",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(30, 0, 150, 0),
+                            child: Text("Count",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey)),
+                          ),
+                        ],
+                      ),
+                    ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: solved.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      tileColor: index.isOdd ? Colors.white : Colors.teal[60],
-                      title: Text("${solved[index]}"),
-                    );
-                  },
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: ListView.builder(
+                    itemCount: solved.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Problems key = solved[index];
+                      return Container(
+                        padding: EdgeInsets.fromLTRB(30, 20, 30, 20),
+                        color: index.isOdd
+                            ? Colors.white
+                            : Color.fromARGB(90, 178, 223, 219),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                                child: ColorLabel[gradeSelected[index]]),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                              child: Text(
+                                  "${ColorLabelName[gradeSelected[index]]}"),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(40, 0, 70, 0),
+                              child: Text("${key.count}"),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                solved.removeAt(index);
+                                setState(() {});
+                              },
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.teal,
+                              ),
+                              label: Text("delete",
+                                  style: TextStyle(color: Colors.teal)),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
               Spacer(),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      createDaysRecord(name, gym, solved);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("${name}님의 운동 기록이 등록되었습니다.")));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Home()));
+                    },
+                    style: TextButton.styleFrom(
+                        minimumSize: Size(150, 60),
+                        backgroundColor: Colors.pink,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40))),
                     child: Padding(
                       padding: const EdgeInsets.all(15),
-                      child: Text("등록"),
+                      child: Text(
+                        "Add WorkOut",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     )),
               )
             ],

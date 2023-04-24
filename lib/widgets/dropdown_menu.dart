@@ -218,7 +218,7 @@ class _CustDropDownState extends State<CustDropDown>
                         padding:
                             const EdgeInsets.only(left: 15), // change it here
                         child: Text(
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
                           widget.hintText,
                           maxLines: 1,
                           overflow: TextOverflow.clip,
