@@ -18,9 +18,23 @@ class _HomeState extends State<Home> {
   List<dynamic>? usersData = [];
   int userCount = 0;
 
-  Future<List> getUsersData() async {
+  Future<List> getAllUsersData() async {
     final getUData =
         await Provider.of<UserProvider>(context, listen: false).getUserList();
+    ChangeNotifier();
+    return getUData;
+  }
+
+  Future getUserData(String _id) async {
+    final getUData =
+        await Provider.of<UserProvider>(context, listen: false).getUser(_id);
+    ChangeNotifier();
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RecordDetail(
+                  personalRecords: getUData,
+                )));
 
     return getUData;
   }
@@ -29,7 +43,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<List<dynamic>?>(
-        future: getUsersData(),
+        future: getAllUsersData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             usersData = snapshot.data;
@@ -88,6 +102,7 @@ class _HomeState extends State<Home> {
                 SliverList(
                     delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
+                    var userData = this.usersData![index];
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Container(
@@ -107,29 +122,20 @@ class _HomeState extends State<Home> {
                               Padding(
                                   padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
                                   child: Text(
-                                    this.usersData![index]["power"].toString(),
+                                    userData["power"].toString(),
                                     textScaleFactor: 1,
                                   )),
                               Padding(
                                 padding:
                                     const EdgeInsets.fromLTRB(50, 0, 70, 0),
                                 child: Text(
-                                  this.usersData![index]["name"],
+                                  userData["name"],
                                   textScaleFactor: 1,
                                 ),
                               ),
                               TextButton(
                                   onPressed: () async {
-                                    final getUData =
-                                        await Provider.of<UserProvider>(context,
-                                                listen: false)
-                                            .getUser(
-                                                this.usersData![index]['id']);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => RecordDetail(
-                                                personalRecords: getUData)));
+                                    getUserData(userData['_id']);
                                   },
                                   style: TextButton.styleFrom(
                                       minimumSize: Size(90, 15),

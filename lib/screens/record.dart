@@ -10,8 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Record extends StatefulWidget {
-  Record({Key? key, required this.userNameList}) : super(key: key);
+  Record({Key? key, required this.userNameList, this.personalRecord})
+      : super(key: key);
   List userNameList;
+  dynamic personalRecord;
   @override
   State<Record> createState() => _RecordState();
 }
@@ -19,12 +21,16 @@ class Record extends StatefulWidget {
 class _RecordState extends State<Record> {
   late String grade;
   late List gradeSelected = [];
-  late String name;
+  late String name = widget.personalRecord["name"] ?? "";
   late List gradeList = [];
   late List gradeKey = [];
   late List userList = widget.userNameList;
-  late String gym;
+  late String gym = widget.personalRecord["gym"] ?? "";
   late int count;
+  late int gymIndex = Spots.indexOf(widget.personalRecord["gym"]) ?? -1;
+
+  late int nameIndex =
+      widget.userNameList.indexOf(widget.personalRecord["name"]) ?? -1;
   late List<Problems> solved = [];
   late Map gradeSetted = {};
 
@@ -34,8 +40,8 @@ class _RecordState extends State<Record> {
             .getGymGrade(gym);
     gradeSetted.remove("__typename");
 
-    gradeList = gradeSetted.values.toList();
-    gradeKey = gradeSetted.keys.toList();
+    gradeList = gradeSetted.values.toList(); // 한글
+    gradeKey = gradeSetted.keys.toList(); // 영문+숫자
 
     setState(() {});
     ChangeNotifier();
@@ -49,6 +55,34 @@ class _RecordState extends State<Record> {
 
     setState(() {});
     ChangeNotifier();
+  }
+
+  Future editRecord(String id, String password, String name, String gym,
+      List problems) async {
+    final editRecordValue =
+        await Provider.of<RecordProvider>(context, listen: false)
+            .editRecord(id, password, name, gym, problems);
+
+    setState(() {});
+    ChangeNotifier();
+    return editRecordValue;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.personalRecord != null) {
+      for (var element in widget.personalRecord["problems"]) {
+        Problems p = Problems(grade: element['grade'], count: element['count']);
+        solved.add(p);
+
+        gradeSelected.add(element['grade']);
+        print(gradeSelected);
+      }
+      getGrade(gym);
+      setState(() {});
+    }
   }
 
   @override
@@ -67,20 +101,22 @@ class _RecordState extends State<Record> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: CustDropDown(
+                            // defaultSelectedIndex: nameIndex,
                             maxListHeight: 500,
                             borderWidth: 1,
                             hintText: "Choose Name",
                             items: [
                               for (var u in userList)
                                 CustDropdownMenuItem(
-                                    value: u,
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          10, 0, 0, 0),
-                                      child: Text(
-                                        "${u}",
-                                      ),
-                                    ))
+                                  value: u,
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                    child: Text(
+                                      "${u}",
+                                    ),
+                                  ),
+                                )
                             ],
                             onChanged: (selectedName) async {
                               name = selectedName;
@@ -89,6 +125,7 @@ class _RecordState extends State<Record> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: CustDropDown(
+                            // defaultSelectedIndex: gymIndex,
                             borderWidth: 0.8,
                             hintText: "Choose Gym",
                             items: [
@@ -103,7 +140,6 @@ class _RecordState extends State<Record> {
                             ],
                             onChanged: (selectedGym) async {
                               getGrade(GymNameMapping[selectedGym]);
-                              gym = GymNameMapping[selectedGym];
                             }),
                       ),
                     ],
@@ -157,7 +193,7 @@ class _RecordState extends State<Record> {
                       onPressed: () {
                         Problems problem = Problems(grade: grade, count: count);
                         solved.add(problem);
-                        print(solved);
+
                         setState(() {});
                       },
                       icon: Icon(
@@ -219,6 +255,9 @@ class _RecordState extends State<Record> {
                     itemCount: solved.length,
                     itemBuilder: (BuildContext context, int index) {
                       Problems key = solved[index];
+                      int findGrade = gradeKey.indexOf(gradeSelected[index]);
+                      gradeSelected[index] = gradeList[findGrade];
+                      print(gradeSelected[index]);
                       return Container(
                         padding: EdgeInsets.fromLTRB(30, 20, 30, 20),
                         color: index.isOdd

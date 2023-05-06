@@ -5,7 +5,7 @@ class MyMutation {
 	mutation(\$name: String!, \$password: String!){
 	  createUser(name:\$name, password:\$password){
 	    name
-			
+			power
 	  }
   }
 """;
@@ -87,3 +87,5 @@ class MyMutation {
   }
 """;
 }
+
+// id -> 기록 id

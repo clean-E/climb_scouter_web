@@ -22,7 +22,7 @@ class MyQuery {
   static final String getPowerRank = """
 	query {
 		getPowerRank {
-      id
+      _id
 			name
 			power
 		}
