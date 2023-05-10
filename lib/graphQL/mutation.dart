@@ -45,7 +45,6 @@ class MyMutation {
 	  editRecord(record:\$record){
 	    name
       records {
-				_id
 				date
 				gym
 				total
@@ -76,7 +75,6 @@ class MyMutation {
 	  deleteRecord(id:\$id, name:\$name, password:\$password){
 	    name
 			records {
-				_id
 				date
 				gym
 				total
