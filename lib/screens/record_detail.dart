@@ -158,7 +158,7 @@ class _RecordDetailState extends State<RecordDetail> {
                                           actions: [
                                             TextButton(
                                                 onPressed: (() {
-                                                  dispose();
+                                                  // dispose();
                                                   Navigator.of(context).pop();
                                                 }),
                                                 child: Text("cancel")),

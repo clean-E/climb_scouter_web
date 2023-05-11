@@ -7,10 +7,12 @@ import 'package:climb_scouter_web/screens/record.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future main() async {
   // initializeDateFormatting('ko_KR', null);
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: 'assets/config/.env');
   runApp(MyApp());
 }
 
