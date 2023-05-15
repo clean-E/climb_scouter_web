@@ -30,7 +30,7 @@ class UserProvider with ChangeNotifier {
       print(result.exception);
     }
     final resultData = result.data?["getUser"];
-    print('getUserProvider : ${resultData}');
+    // print('getUserProvider : ${resultData}');
     notifyListeners();
     return resultData;
   }

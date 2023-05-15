@@ -6,6 +6,7 @@ class MyQuery {
 	  getUser(id: \$id) {
 	    name
       records {
+        _id
 				date
 				gym
 				total

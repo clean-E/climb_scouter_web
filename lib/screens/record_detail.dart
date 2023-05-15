@@ -44,6 +44,8 @@ class _RecordDetailState extends State<RecordDetail> {
     if (delRecordValue == "Wrong Password") {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("비밀번호가 일치하지 않습니다.")));
+      _pwdController.clear();
+      setState(() {});
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("기록이 삭제되었습니다.")));
@@ -76,8 +78,7 @@ class _RecordDetailState extends State<RecordDetail> {
                 itemCount: records.length,
                 itemBuilder: (BuildContext context, int index) {
                   Map theDayRecord = records[index];
-                  // getGymGrade(theDayRecord['gym']);
-                  print("theDayRecord: ${theDayRecord}");
+                  _id = theDayRecord['_id'];
                   return Padding(
                     padding: const EdgeInsets.all(10),
                     child: Container(
@@ -153,17 +154,20 @@ class _RecordDetailState extends State<RecordDetail> {
                                           content: TextField(
                                             controller: _pwdController,
                                             maxLines: 1,
+                                            onChanged: ((value) {
+                                              password = value;
+                                            }),
                                             // decoration: InputDecoration(),
                                           ),
                                           actions: [
                                             TextButton(
                                                 onPressed: (() {
-                                                  // dispose();
                                                   Navigator.of(context).pop();
                                                 }),
                                                 child: Text("cancel")),
                                             TextButton(
                                                 onPressed: (() {
+                                                  print(password);
                                                   deleteRecord(
                                                       _id, name, password);
                                                 }),

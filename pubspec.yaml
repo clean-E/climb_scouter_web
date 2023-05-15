@@ -29,8 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    assets:
-      - .env
+    # assets:
+    #   - .env
   flutter_dotenv: ^5.0.2
 
 

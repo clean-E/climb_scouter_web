@@ -19,7 +19,9 @@ class Record extends StatefulWidget {
 }
 
 class _RecordState extends State<Record> {
+  late String mode = "new";
   late String grade;
+  late String selectedGrade;
   late List gradeSelected = [];
   late String name = widget.personalRecord["name"] ?? "";
   late List gradeList = [];
@@ -73,6 +75,8 @@ class _RecordState extends State<Record> {
     // TODO: implement initState
     super.initState();
     if (widget.personalRecord != null) {
+      mode = "edit";
+      print(mode);
       for (var element in widget.personalRecord["problems"]) {
         Problems p = Problems(grade: element['grade'], count: element['count']);
         solved.add(p);
@@ -161,11 +165,12 @@ class _RecordState extends State<Record> {
                                         const EdgeInsets.fromLTRB(10, 0, 0, 0),
                                     child: ColorLabel[l]))
                         ],
-                        onChanged: (selectedGrade) {
-                          int findGrade = gradeList.indexOf(selectedGrade);
-                          grade = gradeKey[findGrade];
-                          gradeSelected.add(selectedGrade);
-                          setState(() {});
+                        onChanged: (value) {
+                          selectedGrade = value;
+                          // int findGrade = gradeList.indexOf(selectedGrade);
+                          // grade = gradeKey[findGrade];
+                          // gradeSelected.add(selectedGrade);
+                          // setState(() {});
                         }),
                   ),
                   Padding(
@@ -191,9 +196,12 @@ class _RecordState extends State<Record> {
                     padding: const EdgeInsets.all(8.0),
                     child: TextButton.icon(
                       onPressed: () {
-                        Problems problem = Problems(grade: grade, count: count);
+                        Problems problem =
+                            Problems(grade: selectedGrade, count: count);
                         solved.add(problem);
-
+                        // for (var element in solved) {
+                        //   print(element.grade + element.count.toString());
+                        // }
                         setState(() {});
                       },
                       icon: Icon(
@@ -255,9 +263,17 @@ class _RecordState extends State<Record> {
                     itemCount: solved.length,
                     itemBuilder: (BuildContext context, int index) {
                       Problems key = solved[index];
-                      int findGrade = gradeKey.indexOf(gradeSelected[index]);
-                      gradeSelected[index] = gradeList[findGrade];
-                      print(gradeSelected[index]);
+                      // int findGrade = gradeKey.indexOf(gradeSelected[index]);
+                      if (mode == "edit") {
+                        int findGrade = gradeKey.indexOf(key.grade); // edit
+                        gradeSelected.add(gradeList[findGrade]);
+                        print("edit");
+                      } else {
+                        gradeSelected.add(key.grade);
+                        print("gradeSelected:${gradeSelected}");
+                      }
+
+                      // print(gradeSelected[index]);
                       return Container(
                         padding: EdgeInsets.fromLTRB(30, 20, 30, 20),
                         color: index.isOdd

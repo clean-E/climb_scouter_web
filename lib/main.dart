@@ -12,7 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future main() async {
   // initializeDateFormatting('ko_KR', null);
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: 'assets/config/.env');
+  // await dotenv.load(fileName: 'assets/config/.env');
   runApp(MyApp());
 }
 
